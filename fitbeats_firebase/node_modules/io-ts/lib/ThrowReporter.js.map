@@ -1,0 +1,1 @@
+{"version":3,"file":"ThrowReporter.js","sourceRoot":"","sources":["../src/ThrowReporter.ts"],"names":[],"mappings":";;AACA,+CAA6C;AAEhC,QAAA,aAAa,GAAmB;IAC3C,MAAM,EAAE,UAAA,UAAU;QAChB,IAAI,UAAU,CAAC,MAAM,EAAE,EAAE;YACvB,MAAM,2BAAY,CAAC,MAAM,CAAC,UAAU,CAAC,CAAC,IAAI,CAAC,IAAI,CAAC,CAAA;SACjD;IACH,CAAC;CACF,CAAA"}

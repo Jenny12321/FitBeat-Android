@@ -1,0 +1,39 @@
+{
+  "fitbit": {
+    "appUUID": "791a6dbf-1994-4a4e-bc15-3e5769f8003a",
+    "appType": "app",
+    "appDisplayName": "Fitbeats Test",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "#ffffff",
+    "requestedPermissions": [
+      "access_heart_rate",
+      "run_background",
+      "access_internet"
+    ],
+    "buildTargets": [
+      "higgs",
+      "meson"
+    ],
+    "i18n": {
+      "en": {
+        "name": "Fitbeats Test"
+      }
+    }
+  },
+  "name": "fitbeats-test",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@fitbit/sdk": "~1.0.2",
+    "@fitbit/sdk-cli": "^1.0.1"
+  },
+  "scripts": {
+    "start": "npm run-script build && fitbit",
+    "build": "fitbit-build",
+    "debug": "fitbit"
+  },
+  "dependencies": {
+    "firebase": "^5.5.0"
+  }
+}
