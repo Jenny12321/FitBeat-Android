@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "519794952011",
+    "firebase_url": "https://fitbeat-549ab.firebaseio.com",
+    "project_id": "fitbeat-549ab",
+    "storage_bucket": "fitbeat-549ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519794952011:android:db6735c6833e85ff",
+        "android_client_info": {
+          "package_name": "com.example.michellewong.fitbeat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "519794952011-1fmqul5p98ga1johad1ruua182usrlqk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.michellewong.fitbeat",
+            "certificate_hash": "7f513292c96157ed4a03d0ee8e7d2ba946cbd20e"
+          }
+        },
+        {
+          "client_id": "519794952011-6fq122v2v8c3g9arm82tfgsddetrecfh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABuy2G_slLttmFChqNVRfDoQVDji3y2FU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "519794952011-6fq122v2v8c3g9arm82tfgsddetrecfh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
