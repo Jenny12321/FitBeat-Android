@@ -57,19 +57,8 @@ public class MainActivity extends AppCompatActivity {
     TextView songTitle = (TextView)findViewById(R.id.textView3);
     ImageButton button = (ImageButton)findViewById(R.id.imageButton7);
 
-    public void skipPressed(View v)
-    {
-        switch (v.getId())   // v is the button that was clicked
-        {
-
-            case (R.id.imageButton7):  // this is the oddball
-                mSpotifyAppRemote.getPlayerApi().skipNext();
-                break;
-            default:   // this will run the same code for any button clicked that doesn't have id of button1 defined in xml
-                break;
-        }
-    }
-
+    private int max;
+    private int min;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d(TAG, "BEFORE Value is::: " + dataVal.toString());
                 bpm = dataVal.toString();
+                max = (Integer.parseInt(bpm) + 10);
+                min = (Integer.parseInt(bpm) - 10);
             }
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
@@ -128,28 +119,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
     }
+  
+    public void skipPressed(View v)
+    {
+        switch (v.getId())   // v is the button that was clicked
+        {
+
+            case (R.id.imageButton7):  // this is the oddball
+                mSpotifyAppRemote.getPlayerApi().skipNext();
+                break;
+            default:   // this will run the same code for any button clicked that doesn't have id of button1 defined in xml
+                break;
+        }
+    }
 
     private void connected() {
-        mSpotifyAppRemote.getPlayerApi()
-                .subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>() {
-            @Override
-            public void onEvent(PlayerState playerState) {
-                final Track track = playerState.track;
-                if (track != null && nowPlaying != null) {
-                    if (!track.uri.equals(nowPlaying.getUri())) {
-                        loadNewList("US", "100", "140", "120", "pop");
-                    }
-                    Log.d("MainActivity", track.name + " by " + track.artist.name);
-                }
-            }
-        });
+//        mSpotifyAppRemote.getPlayerApi()
+//                .subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>() {
+//            @Override
+//            public void onEvent(PlayerState playerState) {
+//                final Track track = playerState.track;
+//                if (track != null && nowPlaying != null) {
+//                    if (!track.uri.equals(nowPlaying.getUri())) {
+//                        loadNewList("US", Integer.toString(min), Integer.toString(max), bpm, "edm");
+//                    }
+//                    Log.d("MainActivity", track.name + " by " + track.artist.name);
+//                }
+//            }
+//        });
         final OkHttpClient httpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
 
                 Request request = original.newBuilder()
-                        .header("Authorization", "Bearer BQAaCuFnH79s3JCAEXbg_MRX_d00oBKTlsQI-hhlLW_aenbE8SXp0c8orgBsMqyN9TfIv_xt702lFJqiUZl9Y4s_7RFjHqS9PxktAEQofviexvVzkCdhzS1JUOune3FzMtqary3f42J47OgN491V1uFTchVA9OTjcEwRPpmnruLj8cIA9mV8a53MLtYLJleTAkHSXtpWaxr0M24gcYLcAqgRtpDf7rd5fp67zFxvwJ7WA9A_IOlPT2acagcaRkQVajwcFPI866Nb")
+                        .header("Authorization", "Bearer BQDNDHesWErfisuuAwf-Ev2G5HKjJYiyRCOuOEDRg4Emk0i9nPq1XZZA7C9uAWSYLoJKstF5DL-F6errbCpYEcB4c7ejz5hkjdDK-PjzomOaP86u8vDmneIjml98cA9a4jIwh6bQ5YI7qZtajjg59OaMfLltTLOvmuq4AbHloMShgyqVM9zstXGo9RPRBjAgrsaVSD-C4IEr2LA3SnuRRILRYyLDly4eB2WAd_f8N_ksFm5rbM-Acarz3bX70t3rXOwNxrOBoB_V")
                         .header("Accept", "application/json")
                         .method(original.method(), original.body())
                         .build();
@@ -165,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         Retrofit retrofit = builder.build();
         client = retrofit.create(SpotifyClient.class);
         if (nowPlaying == null) {
-            loadNewList("US", "100", "140", "120", "pop");
+            loadNewList("US", Integer.toString(min), Integer.toString(max), bpm, "edm");
         }
     }
 
