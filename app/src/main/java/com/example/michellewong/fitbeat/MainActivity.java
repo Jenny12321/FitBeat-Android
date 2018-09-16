@@ -3,6 +3,9 @@ package com.example.michellewong.fitbeat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.gson.JsonArray;
 import com.google.firebase.database.DataSnapshot;
@@ -44,11 +47,16 @@ public class MainActivity extends AppCompatActivity {
     Song nowPlaying = null;
     SpotifyClient client;
 
+
     // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("bpm").child("message").child("heartRate");
 
     private String bpm;
+    TextView songTempo = (TextView)findViewById(R.id.textView2);
+    TextView songTitle = (TextView)findViewById(R.id.textView3);
+    ImageButton button = (ImageButton)findViewById(R.id.imageButton7);
+
     private int max;
     private int min;
 
@@ -103,11 +111,26 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+    }
+  
+    public void skipPressed(View v)
+    {
+        switch (v.getId())   // v is the button that was clicked
+        {
+
+            case (R.id.imageButton7):  // this is the oddball
+                mSpotifyAppRemote.getPlayerApi().skipNext();
+                break;
+            default:   // this will run the same code for any button clicked that doesn't have id of button1 defined in xml
+                break;
+        }
     }
 
     private void connected() {
@@ -162,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 getTempo(song);
                 mSpotifyAppRemote.getPlayerApi().play(song.getUri());
                 nowPlaying = song;
+                songTitle.setText(song.getName());
                 played.add(song);
             }
 
@@ -182,6 +206,10 @@ public class MainActivity extends AppCompatActivity {
                 JsonObject features = response.body();
                 int tempo = (int) Math.round(Double.parseDouble(features.get("tempo").toString()));
                 System.out.println(tempo);
+                songTempo.setText(String.valueOf(tempo));
+
+
+
             }
 
             @Override
