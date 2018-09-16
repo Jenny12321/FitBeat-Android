@@ -53,17 +53,22 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference ref = database.getReference("bpm").child("message").child("heartRate");
 
     private String bpm;
-    TextView songTempo = (TextView)findViewById(R.id.textView2);
-    TextView songTitle = (TextView)findViewById(R.id.textView3);
-    ImageButton button = (ImageButton)findViewById(R.id.imageButton7);
+    TextView songTempo;
+    TextView songTitle;
+    ImageButton button;
 
     private int max;
     private int min;
+    private String genre = "road-trip";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        songTempo = (TextView)findViewById(R.id.textView2);
+        songTitle = (TextView)findViewById(R.id.textView3);
+        button = (ImageButton)findViewById(R.id.imageButton6);
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(REDIRECT_URI)
@@ -125,8 +130,9 @@ public class MainActivity extends AppCompatActivity {
         switch (v.getId())   // v is the button that was clicked
         {
 
-            case (R.id.imageButton7):  // this is the oddball
-                mSpotifyAppRemote.getPlayerApi().skipNext();
+            case (R.id.imageButton6):  // this is the oddball
+                loadNewList("US", Integer.toString(min),Integer.toString(max),bpm,genre);
+
                 break;
             default:   // this will run the same code for any button clicked that doesn't have id of button1 defined in xml
                 break;
@@ -153,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 Request original = chain.request();
 
                 Request request = original.newBuilder()
-                        .header("Authorization", "Bearer BQDNDHesWErfisuuAwf-Ev2G5HKjJYiyRCOuOEDRg4Emk0i9nPq1XZZA7C9uAWSYLoJKstF5DL-F6errbCpYEcB4c7ejz5hkjdDK-PjzomOaP86u8vDmneIjml98cA9a4jIwh6bQ5YI7qZtajjg59OaMfLltTLOvmuq4AbHloMShgyqVM9zstXGo9RPRBjAgrsaVSD-C4IEr2LA3SnuRRILRYyLDly4eB2WAd_f8N_ksFm5rbM-Acarz3bX70t3rXOwNxrOBoB_V")
+                        .header("Authorization", "Bearer BQDoxjBGK9kdTbDkfJpuWGKUYYQbQSoq3DvFXj3gjJ6-RtHqijrW1DhUOpWyrYqMalDa4MkiBobM1R8I5FWihG3m8X_Cj5WZy0DJpn6uQMIJNRkPGqcfv-ja8dGiZ14fDeafLDtujZALeR3F6mC-k1RbIuZffjs-aOCgYD2Y-PBqaRxtQ0dXDnc4W0HxF2ssioVMcRdKjM_BFRrSwPD8zReTMKCpQb1JQqmBTkczgHkKCELcY8JfFMbb5EHrk9_z9bO59vjvrEeA")
                         .header("Accept", "application/json")
                         .method(original.method(), original.body())
                         .build();
@@ -169,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         Retrofit retrofit = builder.build();
         client = retrofit.create(SpotifyClient.class);
         if (nowPlaying == null) {
-            loadNewList("US", Integer.toString(min), Integer.toString(max), bpm, "edm");
+            loadNewList("US", Integer.toString(min), Integer.toString(max), bpm, genre);
         }
     }
 
@@ -206,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                 JsonObject features = response.body();
                 int tempo = (int) Math.round(Double.parseDouble(features.get("tempo").toString()));
                 System.out.println(tempo);
-                songTempo.setText(String.valueOf(tempo));
+                songTempo.setText("Tempo: "+ String.valueOf(tempo));
 
 
 

@@ -43,7 +43,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:text="Tempo" />
+        android:text="Tempo"
+        android:textSize="24sp" />
 
     <ImageButton
         android:id="@+id/imageButton7"
@@ -57,10 +58,10 @@
         android:id="@+id/imageButton6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageButton7"
-        android:layout_toEndOf="@+id/textView2"
-        app:srcCompat="@android:drawable/ic_media_ff"
-        android:onClick="skipPressed"/>
+        android:layout_alignEnd="@+id/imageView11"
+        android:layout_centerVertical="true"
+        android:onClick="skipPressed"
+        app:srcCompat="@android:drawable/ic_media_ff" />
 
     <TextView
         android:id="@+id/textView3"
@@ -68,5 +69,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/imageView12"
         android:layout_centerHorizontal="true"
-        android:text="Song Title" />
+        android:text="Song Title"
+        android:textSize="24sp" />
 </RelativeLayout>
