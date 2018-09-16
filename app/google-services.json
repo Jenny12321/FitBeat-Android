@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "519794952011-g7pir73g05fkfmo2ec5p46kcd2ohmdnn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.michellewong.fitbeat",
+            "certificate_hash": "615b8cbfbfc95c15f0ba9addd2587babe44a7b5e"
+          }
+        },
+        {
           "client_id": "519794952011-6fq122v2v8c3g9arm82tfgsddetrecfh.apps.googleusercontent.com",
           "client_type": 3
         }

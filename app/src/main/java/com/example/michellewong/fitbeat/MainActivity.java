@@ -21,22 +21,18 @@ import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 
-public class MainActivity extends AppCompatActivity {
-    public static class Post {
-        public String bpm;
+import java.util.HashMap;
 
-        public Post(String bpm) {
-            this.bpm = bpm;
-        }
-    }
+public class MainActivity extends AppCompatActivity {
 
     private static final String CLIENT_ID = "2e6beef170124eccbc991779c72830f6";
     private static final String REDIRECT_URI = "fitbeat://callback";
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final String TAG = "MainActivity";
 
-    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    DatabaseReference   ref = db.getReferenceFromUrl("https://fitbeat-549ab.firebaseio.com/");
+    // Write a message to the database
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference ref = database.getReference("bpm").child("message").child("heartRate");
 
     private String bpm;
 
@@ -54,39 +50,28 @@ public class MainActivity extends AppCompatActivity {
                         .setRedirectUri(REDIRECT_URI)
                         .showAuthView(true)
                         .build();
-        SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
-                new Connector.ConnectionListener() {
 
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
-                        connected();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.e("MainActivity", throwable.getMessage(), throwable);
-
-                        // Something went wrong when attempting to connect! Handle errors here
-                    }
-                });
         super.onStart();
 
-
+        Log.d("HERREEEE", "HELLOO");
+        // Read from the database
         ref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Post post = dataSnapshot.getValue(Post.class);
-                System.out.print(post);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+
+
+                Object dataVal = dataSnapshot.getValue();
+                //dataSnapshot.getValue(Post.class);
+
+                Log.d(TAG, "BEFORE Value is::: " + dataVal.toString());
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                System.out.println("The read failed: " + databaseError.getCode());
-
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
 
@@ -96,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private void connected() {
 
 
-        mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");    }
+     //   mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+    }
 
     @Override
     protected void onStop() {
