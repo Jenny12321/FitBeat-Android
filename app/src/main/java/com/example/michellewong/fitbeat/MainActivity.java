@@ -22,18 +22,29 @@ import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 
 public class MainActivity extends AppCompatActivity {
+    public static class Post {
+        public String bpm;
+
+        public Post(String bpm) {
+            this.bpm = bpm;
+        }
+    }
 
     private static final String CLIENT_ID = "2e6beef170124eccbc991779c72830f6";
     private static final String REDIRECT_URI = "fitbeat://callback";
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final String TAG = "MainActivity";
 
-    private DatabaseReference db;
+    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
+    DatabaseReference   ref = db.getReferenceFromUrl("https://fitbeat-549ab.firebaseio.com/");
+
+    private String bpm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
     }
 
     @Override
@@ -63,27 +74,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         super.onStart();
+
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Post post = dataSnapshot.getValue(Post.class);
+                System.out.print(post);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+
+            }
+        });
+
         // We will start writing our code here.
     }
 
     private void connected() {
 
-        db = FirebaseDatabase.getInstance().getReference();
-        String bpm = db.push().getKey();
-
-        db.child(bpm).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Fitbit_Bpm fb_bpm = dataSnapshot.getValue(Fitbit_Bpm.class);
-
-                Log.d("GOT BPM OF: %s", fb_bpm.getBpm());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, "Failed to read value.", databaseError.toException());
-            }
-        });
 
         mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");    }
 
