@@ -4,16 +4,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-
-import org.json.JSONObject;
+import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.PlayerState;
+import com.spotify.protocol.types.Track;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -29,18 +33,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String REDIRECT_URI = "fitbeat://callback";
     private static final String TAG = "MainActivity";
     private SpotifyAppRemote mSpotifyAppRemote;
+    private List<Song> played = new ArrayList<Song>();
+    Song nowPlaying = null;
     SpotifyClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(REDIRECT_URI)
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // Now you can start interacting with App Remote
                         connected();
+
                     }
 
                     @Override
@@ -67,16 +68,32 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void connected() {
-        mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
+    private void connected() {
+        mSpotifyAppRemote.getPlayerApi()
+                .subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>() {
+            @Override
+            public void onEvent(PlayerState playerState) {
+                final Track track = playerState.track;
+                if (track != null && nowPlaying != null) {
+                    if (!track.uri.equals(nowPlaying.getUri())) {
+                        loadNewList("US", "100", "140", "120", "pop");
+                    }
+                    Log.d("MainActivity", track.name + " by " + track.artist.name);
+                }
+            }
+        });
         final OkHttpClient httpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
 
                 Request request = original.newBuilder()
-                        .header("Authorization", "Bearer BQAJgT_e7p61fLE_ur-YUXoUtJIgTB4hFgusMzoCUu-9_VIykncMcgWC8_js2bLvOZYWMTaUMs3a4SeUpNPEgID3VE7jefFb_hghJIuMhUmBTK91u9tKqVnE-MTEcoiaRAlJNG1Y4BM7A6L86wSXgPIhzk2RRZdt8SO4eR0mqvzdW2Sedp04c5eenzpteTxWSp0LCXIuyt3MulJFwEH1bJy5C4xwVr3hVFfZO7Ns_P1ac95pBOrzdit6vJTpXx6wrG-UhVR-FFuJ")
+                        .header("Authorization", "Bearer BQAaCuFnH79s3JCAEXbg_MRX_d00oBKTlsQI-hhlLW_aenbE8SXp0c8orgBsMqyN9TfIv_xt702lFJqiUZl9Y4s_7RFjHqS9PxktAEQofviexvVzkCdhzS1JUOune3FzMtqary3f42J47OgN491V1uFTchVA9OTjcEwRPpmnruLj8cIA9mV8a53MLtYLJleTAkHSXtpWaxr0M24gcYLcAqgRtpDf7rd5fp67zFxvwJ7WA9A_IOlPT2acagcaRkQVajwcFPI866Nb")
                         .header("Accept", "application/json")
                         .method(original.method(), original.body())
                         .build();
@@ -91,16 +108,24 @@ public class MainActivity extends AppCompatActivity {
 
         Retrofit retrofit = builder.build();
         client = retrofit.create(SpotifyClient.class);
-        Call<JsonObject> call = client.loadRecommendations("US", "60", "80", "70", "pop");
+        if (nowPlaying == null) {
+            loadNewList("US", "100", "140", "120", "pop");
+        }
+    }
+
+    public void loadNewList(String market, String min_tempo, String max_tempo, String target_tempo, String seed_genres) {
+
+        Call<JsonObject> call = client.loadRecommendations(market, min_tempo, max_tempo, target_tempo, seed_genres);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, retrofit2.Response<JsonObject> response) {
-                JsonObject songs = response.body();
-                JsonElement first_song = songs.getAsJsonArray("tracks").get(0);
-                Song song = getFirstSong((JsonObject) first_song);
+                JsonArray songs = response.body().getAsJsonArray("tracks");
+                Song song = findNextSong(songs);
+                getTempo(song);
                 mSpotifyAppRemote.getPlayerApi().play(song.getUri());
-
+                nowPlaying = song;
+                played.add(song);
             }
 
             @Override
@@ -110,18 +135,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public Song getFirstSong(JsonObject jsonObject) {
-        Song song = new Song();
-        song.setHref(jsonObject.get("href").toString().substring(1, jsonObject.get("href").toString().length() - 1));
-        song.setId(jsonObject.get("id").toString().substring(1, jsonObject.get("id").toString().length() - 1));
-        song.setName(jsonObject.get("name").toString().substring(1, jsonObject.get("name").toString().length() - 1));
-        song.setType(jsonObject.get("type").toString().substring(1, jsonObject.get("type").toString().length() - 1));
-        song.setUri(jsonObject.get("uri").toString().substring(1, jsonObject.get("uri").toString().length() - 1));
+    public void getTempo(Song song) {
         Call<JsonObject> call = client.loadSongTempo(song.getId());
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, retrofit2.Response<JsonObject> response) {
+
                 JsonObject features = response.body();
                 int tempo = (int) Math.round(Double.parseDouble(features.get("tempo").toString()));
                 System.out.println(tempo);
@@ -133,8 +153,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        return song;
+    }
 
+    protected Song createSong(JsonObject jsonObject) {
+        Song song = new Song();
+        song.setHref(jsonObject.get("href").toString().substring(1, jsonObject.get("href").toString().length() - 1));
+        song.setId(jsonObject.get("id").toString().substring(1, jsonObject.get("id").toString().length() - 1));
+        song.setName(jsonObject.get("name").toString().substring(1, jsonObject.get("name").toString().length() - 1));
+        song.setType(jsonObject.get("type").toString().substring(1, jsonObject.get("type").toString().length() - 1));
+        song.setUri(jsonObject.get("uri").toString().substring(1, jsonObject.get("uri").toString().length() - 1));
+        return song;
+    }
+
+    protected Song findNextSong(JsonArray playlist) {
+        int index = new Random().nextInt(playlist.size());
+        Song song;
+        while(playlist.size() > 0) {
+            JsonElement songElement = playlist.get(index);
+            song = createSong((JsonObject) songElement);
+            if (played.indexOf(song) != -1) {
+                playlist.remove(index);
+                index = new Random().nextInt(playlist.size());
+            } else {
+                if (played.size() > 4) {
+                    played.add(song);
+                    played.remove(0);
+                } else {
+                    played.add(song);
+                }
+                return song;
+            }
+        }
+        song = played.remove(0);
+        played.add(song);
+        return song;
     }
 
     @Override
